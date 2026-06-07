@@ -26,6 +26,7 @@ export function LivePlayer({
   const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(
     stream.videoId,
   )}`;
+  const tiktokUrl = stream.tiktokUrl;
 
   const removeHref = buildDashboardHref(
     layout,
@@ -83,6 +84,19 @@ export function LivePlayer({
       </CardContent>
 
       <CardFooter className="justify-end gap-2">
+        {tiktokUrl ? (
+          <Button
+            asChild
+            size="sm"
+            variant="secondary"
+            aria-label={`Open ${stream.streamerName} on TikTok`}
+          >
+            <a href={tiktokUrl} target="_blank" rel="noopener noreferrer">
+              TikTok
+              <ExternalLink className="h-4 w-4" aria-hidden />
+            </a>
+          </Button>
+        ) : null}
         <Button asChild size="sm" aria-label={`Open ${stream.streamerName} on YouTube`}>
           <a href={watchUrl} target="_blank" rel="noopener noreferrer">
             Open on YouTube

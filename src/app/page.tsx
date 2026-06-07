@@ -46,7 +46,7 @@ export default async function Home({
           <div className="space-y-4">
             <EmptyState
               title="No monitored channels configured"
-              description="Add channel entries to /data/streamers.json (name + channelId) to start monitoring."
+              description="Add channel entries to /data/streamers.json (name + channelId, optional tiktokUrl) to start monitoring."
             />
           </div>
         </main>
@@ -133,7 +133,7 @@ export default async function Home({
               )}
             </div>
 
-            <LiveSidebar streams={liveStreams} />
+            <LiveSidebar streams={liveStreams} monitored={monitored} />
           </div>
         </div>
       </main>

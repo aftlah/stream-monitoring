@@ -1,4 +1,54 @@
 [
-  { "name": "Ojan", "channelId": "UCj1jXMG3tXmVBFLvoCZNOLw" },
-  { "name": "Doni", "channelId": "UCcwE-tBXPxS_oNn25qRkisQ" }
+  {
+    "name": "Ojan",
+    "channelId": "UCj1jXMG3tXmVBFLvoCZNOLw"
+  },
+  {
+    "name": "Doni",
+    "channelId": "UCcwE-tBXPxS_oNn25qRkisQ"
+  },
+  {
+    "name": "Nero",
+    "channelId": "UCL7cD4QBsvJmCx7wfO2tSVw"
+  },
+  {
+    "name": "Ucup",
+    "channelId": "UCKlYIqDJunkmChWqjRKJPKA"
+  },
+  {
+    "name": "Marine",
+    "channelId": "UCPiWByQ3XZbzCi4IOEomJEA"
+  },
+  {
+    "name": "Evan",
+    "channelId": "UCbuBxOJ1-62IdAQVj9GtjXA"
+  },
+  {
+    "name": "George",
+    "channelId": "UC8iQzr9utcoQOAvaRW2QWAQ"
+  },
+  {
+    "name": "ElDee",
+    "channelId": "UCTzH67PF8lhMY1p9JA39veg"
+  },
+  {
+    "name": "Zycan",
+    "channelId": "UC2sl6IRg0xp6eJx3DfQKITg"
+  },
+  {
+    "name": "Ares",
+    "channelId": "UCJY-ytBoNaBmujc9InwicZA"
+  },
+  {
+    "name": "Bita",
+    "channelId": "UCtV9WxhDKnZfkqvOGTVo1iw"
+  },
+  {
+    "name": "Sofie",
+    "tiktokUrl": "https://www.tiktok.com/@sunnnxp0"
+  },
+  {
+    "name": "Babon",
+    "tiktokUrl": "https://www.tiktok.com/@babonkingrp"
+  }
 ]

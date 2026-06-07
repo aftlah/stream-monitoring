@@ -27,3 +27,29 @@ export type YoutubeSearchItem = {
 export type YoutubeSearchResponse = {
   items: YoutubeSearchItem[];
 };
+
+export type YoutubeVideoItem = {
+  id: string;
+  snippet: {
+    publishedAt: string;
+    channelId: string;
+    title: string;
+    channelTitle: string;
+    thumbnails: {
+      default?: YoutubeThumbnail;
+      medium?: YoutubeThumbnail;
+      high?: YoutubeThumbnail;
+      standard?: YoutubeThumbnail;
+      maxres?: YoutubeThumbnail;
+    };
+  };
+  liveStreamingDetails?: {
+    actualStartTime?: string;
+    actualEndTime?: string;
+    scheduledStartTime?: string;
+  };
+};
+
+export type YoutubeVideosResponse = {
+  items: YoutubeVideoItem[];
+};

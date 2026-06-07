@@ -1,9 +1,10 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import { ArrowUp, Crosshair, ListVideo } from "lucide-react";
+import { ArrowUp, Crosshair, ExternalLink, ListVideo } from "lucide-react";
 
 import type { LiveStream } from "@/types/live-stream";
+import type { Streamer } from "@/types/streamer";
 import { SearchStreamer } from "@/components/search-streamer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,16 @@ function normalize(s: string) {
   return s.toLowerCase().trim();
 }
 
-export function LiveSidebar({ streams }: { streams: LiveStream[] }) {
+export function LiveSidebar({
+  streams,
+  monitored,
+}: {
+  streams: LiveStream[];
+  monitored: Streamer[];
+}) {
   const [query, setQuery] = useState("");
 
-  const filtered = useMemo(() => {
+  const filteredLive = useMemo(() => {
     const q = normalize(query);
     if (q.length === 0) return streams;
     return streams.filter((s) => {
@@ -24,6 +31,16 @@ export function LiveSidebar({ streams }: { streams: LiveStream[] }) {
       return haystack.includes(q);
     });
   }, [query, streams]);
+
+  const tiktokOnly = useMemo(() => {
+    const q = normalize(query);
+    const candidates = monitored.filter(
+      (s) => typeof s.tiktokUrl === "string" && s.tiktokUrl.length > 0,
+    );
+    const withNoYouTube = candidates.filter((s) => !s.channelId);
+    if (q.length === 0) return withNoYouTube;
+    return withNoYouTube.filter((s) => s.name.toLowerCase().includes(q));
+  }, [monitored, query]);
 
   return (
     <aside
@@ -54,12 +71,12 @@ export function LiveSidebar({ streams }: { streams: LiveStream[] }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
-          {filtered.length === 0 ? (
+          {filteredLive.length === 0 ? (
             <div className="text-sm text-muted-foreground">
               No matches for “{query}”.
             </div>
           ) : (
-            filtered.map((s) => (
+            filteredLive.map((s) => (
               <Fragment key={s.channelId}>
                 <a
                   href={`#stream-${s.channelId}`}
@@ -75,6 +92,33 @@ export function LiveSidebar({ streams }: { streams: LiveStream[] }) {
           )}
         </CardContent>
       </Card>
+
+      {tiktokOnly.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2">TikTok</span>
+              <Badge variant="default">{tiktokOnly.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {tiktokOnly.map((s) => (
+              <div
+                key={s.tiktokUrl}
+                className="flex items-center justify-between gap-2 rounded-md px-2 py-2 text-sm text-foreground"
+              >
+                <span className="min-w-0 truncate">{s.name}</span>
+                <Button asChild size="sm" variant="secondary" aria-label={`Open ${s.name} on TikTok`}>
+                  <a href={s.tiktokUrl} target="_blank" rel="noopener noreferrer">
+                    Open
+                    <ExternalLink className="h-4 w-4" aria-hidden />
+                  </a>
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
