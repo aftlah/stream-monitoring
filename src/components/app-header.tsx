@@ -5,7 +5,12 @@ export function AppHeader() {
   return (
     <header className="border-b border-border bg-background">
       <div className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <Link href="/" aria-label="Go to dashboard" className="flex items-center gap-3">
+        <Link
+          href="/"
+          aria-label="Go to dashboard"
+          target="_self"
+          className="flex items-center gap-3"
+        >
           <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-transparent sm:h-14 sm:w-14">
             <Image
               src="/logo_rage.png"

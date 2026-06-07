@@ -63,6 +63,7 @@ export function LiveSidebar({ streams }: { streams: LiveStream[] }) {
               <Fragment key={s.channelId}>
                 <a
                   href={`#stream-${s.channelId}`}
+                  target="_self"
                   className="flex items-center justify-between gap-3 rounded-md border border-transparent px-2 py-2 text-sm text-foreground hover:border-primary/40 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   aria-label={`Jump to ${s.streamerName}`}
                 >
@@ -84,22 +85,22 @@ export function LiveSidebar({ streams }: { streams: LiveStream[] }) {
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           <Button asChild variant="secondary" size="sm">
-            <a href="#top" aria-label="Jump to top">
+            <a href="#top" target="_self" aria-label="Jump to top">
               Top
             </a>
           </Button>
           <Button asChild variant="secondary" size="sm">
-            <a href="#stats" aria-label="Jump to statistics">
+            <a href="#stats" target="_self" aria-label="Jump to statistics">
               Statistics
             </a>
           </Button>
           <Button asChild variant="secondary" size="sm">
-            <a href="#live" aria-label="Jump to live grid">
+            <a href="#live" target="_self" aria-label="Jump to live grid">
               Live Grid
             </a>
           </Button>
           <Button asChild variant="secondary" size="sm">
-            <a href="#multiview" aria-label="Jump to multi-view">
+            <a href="#multiview" target="_self" aria-label="Jump to multi-view">
               Multi-View
             </a>
           </Button>

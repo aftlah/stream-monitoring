@@ -42,7 +42,7 @@ export function LiveMultiview({
           ) : null}
         </div>
         <Button asChild variant="secondary" size="sm" aria-label="Clear multi-view selection">
-          <a href={clearHref}>
+          <a href={clearHref} target="_self">
             Clear
             <Trash2 className="h-4 w-4" aria-hidden />
           </a>

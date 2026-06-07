@@ -62,7 +62,7 @@ export function LivePlayer({
           size="icon"
           aria-label={`Remove ${stream.streamerName} from multi-view`}
         >
-          <a href={removeHref}>
+          <a href={removeHref} target="_self">
             <X className="h-4 w-4" aria-hidden />
           </a>
         </Button>

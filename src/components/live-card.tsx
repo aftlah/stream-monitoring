@@ -69,7 +69,7 @@ export function LiveCard({
               : `Add ${stream.streamerName} to multi-view`
           }
         >
-          <a href={multiviewHref}>
+          <a href={multiviewHref} target="_self">
             {isSelected ? "In Multi-View" : "Multi-View"}
             <MonitorUp className="h-4 w-4" aria-hidden />
           </a>
