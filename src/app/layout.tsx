@@ -16,6 +16,10 @@ export const metadata: Metadata = {
   title: "RAGE LIVE MONITOR",
   description:
     "A premium black-and-gold YouTube livestream monitoring dashboard for channels currently live.",
+  icons: {
+    icon: [{ url: "/logo_rage.png", type: "image/png" }],
+    apple: [{ url: "/logo_rage.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({
