@@ -14,6 +14,20 @@ function normalize(s: string) {
   return s.toLowerCase().trim();
 }
 
+function toTiktokLiveUrl(tiktokUrl: string): string {
+  try {
+    const url = new URL(tiktokUrl);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const at = parts.find((p) => p.startsWith("@"));
+    if (!at) return tiktokUrl;
+    const handle = at.slice(1).trim();
+    if (handle.length === 0) return tiktokUrl;
+    return `https://m.tiktok.com/@${encodeURIComponent(handle)}/live`;
+  } catch {
+    return tiktokUrl;
+  }
+}
+
 export function LiveSidebar({
   streams,
   monitored,
@@ -65,7 +79,7 @@ export function LiveSidebar({
   return (
     <aside
       aria-labelledby="sidebar-title"
-      className="space-y-3 lg:sticky lg:top-4 lg:flex lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:flex-col lg:overflow-hidden"
+      className="space-y-3 lg:sticky lg:top-4"
     >
       <h2 id="sidebar-title" className="sr-only">
         Sidebar
@@ -80,7 +94,7 @@ export function LiveSidebar({
         </CardHeader>
       </Card>
 
-      <Card className="min-h-0 lg:flex lg:flex-1 lg:flex-col">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-2">
@@ -93,7 +107,7 @@ export function LiveSidebar({
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-1 lg:min-h-0 lg:flex-1 lg:overflow-auto">
+        <CardContent className="max-h-[70vh] space-y-1 overflow-auto lg:max-h-[calc(100vh-14rem)]">
           {filteredMonitored.length === 0 ? (
             <div className="text-sm text-muted-foreground">
               No matches for {query.length > 0 ? `“${query}”` : "your filter"}.
@@ -138,7 +152,7 @@ export function LiveSidebar({
                         aria-label={`Open ${s.name} on TikTok`}
                       >
                         <a
-                          href={s.tiktokUrl}
+                          href={toTiktokLiveUrl(s.tiktokUrl)}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

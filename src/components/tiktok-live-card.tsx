@@ -24,6 +24,14 @@ function getTiktokHandle(tiktokUrl: string): string | null {
   }
 }
 
+function toTiktokLiveUrl(tiktokUrl: string): string {
+  const handle = getTiktokHandle(tiktokUrl);
+  if (!handle) return tiktokUrl;
+  const clean = handle.slice(1).trim();
+  if (clean.length === 0) return tiktokUrl;
+  return `https://m.tiktok.com/@${encodeURIComponent(clean)}/live`;
+}
+
 export function TiktokLiveCard({
   name,
   tiktokUrl,
@@ -32,6 +40,7 @@ export function TiktokLiveCard({
   tiktokUrl: string;
 }) {
   const handle = getTiktokHandle(tiktokUrl);
+  const openUrl = toTiktokLiveUrl(tiktokUrl);
   return (
     <Card className="flex h-full flex-col overflow-hidden">
       <CardHeader className="space-y-2">
@@ -61,7 +70,7 @@ export function TiktokLiveCard({
           className="w-full sm:w-auto"
           aria-label={`Open ${name} on TikTok`}
         >
-          <a href={tiktokUrl} target="_blank" rel="noopener noreferrer">
+          <a href={openUrl} target="_blank" rel="noopener noreferrer">
             Open on TikTok
             <ExternalLink className="h-4 w-4" aria-hidden />
           </a>
