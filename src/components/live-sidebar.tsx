@@ -25,30 +25,42 @@ export function LiveSidebar({
 }) {
   const [query, setQuery] = useState("");
 
-  const filteredLive = useMemo(() => {
-    const q = normalize(query);
-    if (q.length === 0) return streams;
-    return streams.filter((s) => {
-      const haystack = `${s.streamerName} ${s.title}`.toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [query, streams]);
+  const liveByChannelId = useMemo(() => {
+    return new Set(streams.map((s) => s.channelId));
+  }, [streams]);
 
-  const tiktokOnly = useMemo(() => {
-    const q = normalize(query);
-    const candidates = monitored.filter(
-      (s) => typeof s.tiktokUrl === "string" && s.tiktokUrl.length > 0,
-    );
-    const withNoYouTube = candidates.filter((s) => !s.channelId);
-    if (q.length === 0) return withNoYouTube;
-    return withNoYouTube.filter((s) => s.name.toLowerCase().includes(q));
-  }, [monitored, query]);
+  const tiktokLiveByUrl = useMemo(() => {
+    return new Set(tiktokLive.map((t) => t.tiktokUrl));
+  }, [tiktokLive]);
 
-  const filteredTiktokLive = useMemo(() => {
+  const filteredMonitored = useMemo(() => {
     const q = normalize(query);
-    if (q.length === 0) return tiktokLive;
-    return tiktokLive.filter((s) => s.name.toLowerCase().includes(q));
-  }, [query, tiktokLive]);
+    const candidates = monitored
+      .filter((s) => Boolean(s.channelId) || Boolean(s.tiktokUrl))
+      .map((s) => {
+        const channelId = s.channelId;
+        const tiktokUrl = s.tiktokUrl;
+        const isYoutubeLive = channelId ? liveByChannelId.has(channelId) : false;
+        const isTiktokLive = tiktokUrl ? tiktokLiveByUrl.has(tiktokUrl) : false;
+        const isLive = isYoutubeLive || isTiktokLive;
+
+        return {
+          key: channelId ? `yt:${channelId}` : tiktokUrl ? `tt:${tiktokUrl}` : s.name,
+          name: s.name,
+          channelId,
+          tiktokUrl,
+          isLive,
+          isTiktokOnly: !channelId && Boolean(tiktokUrl),
+        };
+      });
+
+    if (q.length === 0) return candidates;
+    return candidates.filter((s) => s.name.toLowerCase().includes(q));
+  }, [liveByChannelId, monitored, query, tiktokLiveByUrl]);
+
+  const totalLiveInSidebar = useMemo(() => {
+    return filteredMonitored.reduce((acc, s) => acc + (s.isLive ? 1 : 0), 0);
+  }, [filteredMonitored]);
 
   return (
     <aside
@@ -73,108 +85,75 @@ export function LiveSidebar({
           <CardTitle className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-2">
               <ListVideo className="h-4 w-4 text-primary" aria-hidden />
-              Live List
+              Streamer List
             </span>
-            <Badge variant="default">{streams.length}</Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="default">{monitored.length}</Badge>
+              <Badge variant="live">{totalLiveInSidebar}</Badge>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
-          {filteredLive.length === 0 ? (
+          {filteredMonitored.length === 0 ? (
             <div className="text-sm text-muted-foreground">
-              No matches for “{query}”.
+              No matches for {query.length > 0 ? `“${query}”` : "your filter"}.
             </div>
           ) : (
-            filteredLive.map((s) => (
-              <Fragment key={s.channelId}>
-                <a
-                  href={`#stream-${s.channelId}`}
-                  target="_self"
-                  className="flex items-center justify-between gap-3 rounded-md border border-transparent px-2 py-2 text-sm text-foreground hover:border-primary/40 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label={`Jump to ${s.streamerName}`}
-                >
-                  <span className="min-w-0 truncate">{s.streamerName}</span>
-                  <Badge variant="live">LIVE</Badge>
-                </a>
+            filteredMonitored.map((s) => (
+              <Fragment key={s.key}>
+                <div className="flex items-center justify-between gap-2 rounded-md px-2 py-2 text-sm text-foreground">
+                  <div className="min-w-0">
+                    <div className="truncate">{s.name}</div>
+                    {s.isTiktokOnly ? (
+                      <div className="text-xs text-muted-foreground">
+                        TikTok account
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {s.isTiktokOnly ? <Badge variant="secondary">TIKTOK</Badge> : null}
+                    {s.isLive ? (
+                      <Badge variant="live">LIVE</Badge>
+                    ) : (
+                      <Badge variant="secondary">OFFLINE</Badge>
+                    )}
+
+                    {s.channelId && s.isLive ? (
+                      <a
+                        href={`#stream-${s.channelId}`}
+                        target="_self"
+                        className="rounded-md border border-transparent px-2 py-1 text-xs text-foreground hover:border-primary/40 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        aria-label={`Jump to ${s.name}`}
+                      >
+                        View
+                      </a>
+                    ) : null}
+
+                    {s.tiktokUrl ? (
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="secondary"
+                        aria-label={`Open ${s.name} on TikTok`}
+                      >
+                        <a
+                          href={s.tiktokUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Open
+                          <ExternalLink className="h-4 w-4" aria-hidden />
+                        </a>
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
               </Fragment>
             ))
           )}
         </CardContent>
       </Card>
-
-      {filteredTiktokLive.length > 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-2">TikTok Live</span>
-              <Badge variant="default">{filteredTiktokLive.length}</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            {filteredTiktokLive.map((s) => (
-              <div
-                key={s.tiktokUrl}
-                className="flex items-center justify-between gap-2 rounded-md px-2 py-2 text-sm text-foreground"
-              >
-                <div className="min-w-0">
-                  <div className="truncate">{s.name}</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="live">LIVE</Badge>
-                  <Button
-                    asChild
-                    size="sm"
-                    variant="secondary"
-                    aria-label={`Open ${s.name} on TikTok`}
-                  >
-                    <a
-                      href={s.tiktokUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Open
-                      <ExternalLink className="h-4 w-4" aria-hidden />
-                    </a>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {tiktokOnly.length > 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-2">TikTok</span>
-              <Badge variant="default">{tiktokOnly.length}</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            {tiktokOnly.map((s) => (
-              <div
-                key={s.tiktokUrl}
-                className="flex items-center justify-between gap-2 rounded-md px-2 py-2 text-sm text-foreground"
-              >
-                <div className="min-w-0">
-                  <div className="truncate">{s.name}</div>
-                  {s.tiktokForceLive ? (
-                    <div className="text-xs text-muted-foreground">
-                      Manual (not auto-detected)
-                    </div>
-                  ) : null}
-                </div>
-                <Button asChild size="sm" variant="secondary" aria-label={`Open ${s.name} on TikTok`}>
-                  <a href={s.tiktokUrl} target="_blank" rel="noopener noreferrer">
-                    Open
-                    <ExternalLink className="h-4 w-4" aria-hidden />
-                  </a>
-                </Button>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
 
       <Card>
         <CardHeader>
