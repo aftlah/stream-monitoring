@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import { ArrowUp, Crosshair, ExternalLink, ListVideo } from "lucide-react";
+import { Crosshair, ExternalLink, ListVideo } from "lucide-react";
 
 import type { LiveStream } from "@/types/live-stream";
 import type { Streamer } from "@/types/streamer";
@@ -65,12 +65,12 @@ export function LiveSidebar({
   return (
     <aside
       aria-labelledby="sidebar-title"
-      className="space-y-3 lg:sticky lg:top-4 lg:h-[calc(100vh-5rem)] lg:overflow-auto"
+      className="space-y-3 lg:sticky lg:top-4 lg:flex lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:flex-col lg:overflow-hidden"
     >
       <h2 id="sidebar-title" className="sr-only">
         Sidebar
       </h2>
-      <Card>
+      <Card className="shrink-0">
         <CardHeader className="space-y-3">
           <CardTitle className="flex items-center gap-2">
             <Crosshair className="h-4 w-4 text-primary" aria-hidden />
@@ -80,7 +80,7 @@ export function LiveSidebar({
         </CardHeader>
       </Card>
 
-      <Card>
+      <Card className="min-h-0 lg:flex lg:flex-1 lg:flex-col">
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export function LiveSidebar({
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-1">
+        <CardContent className="space-y-1 lg:min-h-0 lg:flex-1 lg:overflow-auto">
           {filteredMonitored.length === 0 ? (
             <div className="text-sm text-muted-foreground">
               No matches for {query.length > 0 ? `“${query}”` : "your filter"}.
@@ -155,36 +155,6 @@ export function LiveSidebar({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ArrowUp className="h-4 w-4 text-primary" aria-hidden />
-            Quick Nav
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <Button asChild variant="secondary" size="sm">
-            <a href="#top" target="_self" aria-label="Jump to top">
-              Top
-            </a>
-          </Button>
-          <Button asChild variant="secondary" size="sm">
-            <a href="#stats" target="_self" aria-label="Jump to statistics">
-              Statistics
-            </a>
-          </Button>
-          <Button asChild variant="secondary" size="sm">
-            <a href="#live" target="_self" aria-label="Jump to live grid">
-              Live Grid
-            </a>
-          </Button>
-          <Button asChild variant="secondary" size="sm">
-            <a href="#multiview" target="_self" aria-label="Jump to multi-view">
-              Multi-View
-            </a>
-          </Button>
-        </CardContent>
-      </Card>
     </aside>
   );
 }
