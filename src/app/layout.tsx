@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "RAGE LIVE MONITOR",
   description:
-    "A premium black-and-gold YouTube livestream monitoring dashboard for channels currently live.",
+    "RAGE LIVE MONITOR is a YouTube livestream monitoring dashboard that shows monitored channels currently live, with multi-stream viewing and fast discovery.",
   icons: {
     icon: [{ url: "/logo_rage.png", type: "image/png" }],
     apple: [{ url: "/logo_rage.png", type: "image/png" }],
