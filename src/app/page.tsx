@@ -10,7 +10,7 @@ import { TiktokLiveCard } from "@/components/tiktok-live-card";
 import { getMonitoredStreamers } from "@/lib/streamers";
 import { getTiktokLiveStatuses } from "@/lib/tiktok";
 import { getLiveStreamsForStreamers } from "@/lib/youtube";
-import { parseLayoutOption } from "@/types/layout";
+import { getLayoutCapacity, parseLayoutOption } from "@/types/layout";
 import type { LiveStream } from "@/types/live-stream";
 
 export const revalidate = 60;
@@ -27,13 +27,14 @@ export default async function Home({
       : undefined,
   );
 
+  const multiviewEnabled = resolvedSearchParams?.mv !== "0";
+
   const watchParam = resolvedSearchParams?.watch;
   const requestedWatchIds = Array.isArray(watchParam)
     ? watchParam
     : typeof watchParam === "string" && watchParam.length > 0
       ? [watchParam]
       : [];
-  const selectedVideoIds = Array.from(new Set(requestedWatchIds));
 
   const monitored = await getMonitoredStreamers();
 
@@ -85,6 +86,18 @@ export default async function Home({
   }
 
   const totalLive = liveStreams.length + tiktokLive.length;
+  const capacity = getLayoutCapacity(layout);
+
+  const selectedVideoIds = multiviewEnabled
+    ? Array.from(
+        new Set(
+          requestedWatchIds.length > 0
+            ? requestedWatchIds
+            : liveStreams.slice(0, capacity).map((s) => s.videoId),
+        ),
+      )
+    : [];
+
   const liveByVideoId = new Map(liveStreams.map((s) => [s.videoId, s] as const));
   const selectedStreams = selectedVideoIds
     .map((id) => liveByVideoId.get(id))
@@ -130,11 +143,13 @@ export default async function Home({
                 />
               ) : (
                 <>
-                  <LiveMultiview
-                    selectedStreams={selectedStreams}
-                    layout={layout}
-                    selectedVideoIds={selectedVideoIds}
-                  />
+                  {multiviewEnabled ? (
+                    <LiveMultiview
+                      selectedStreams={selectedStreams}
+                      layout={layout}
+                      selectedVideoIds={selectedVideoIds}
+                    />
+                  ) : null}
                   <div className="flex items-center justify-between gap-3">
                     <h2 className="text-sm font-semibold text-foreground">
                       Live Channels

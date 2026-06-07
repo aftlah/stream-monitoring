@@ -11,7 +11,8 @@ import { Card } from "@/components/ui/card";
 function buildClearHref(layout: LayoutOption) {
   const params = new URLSearchParams();
   params.set("layout", layout);
-  return `/?${params.toString()}#multiview`;
+  params.set("mv", "0");
+  return `/?${params.toString()}#live`;
 }
 
 export function LiveMultiview({

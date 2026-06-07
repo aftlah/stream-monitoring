@@ -9,9 +9,14 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 function buildDashboardHref(layout: LayoutOption, watchIds: string[]) {
   const params = new URLSearchParams();
   params.set("layout", layout);
-  for (const id of watchIds) params.append("watch", id);
+  if (watchIds.length === 0) {
+    params.set("mv", "0");
+  } else {
+    params.set("mv", "1");
+    for (const id of watchIds) params.append("watch", id);
+  }
   const qs = params.toString();
-  return qs.length ? `/?${qs}#multiview` : "/#multiview";
+  return watchIds.length > 0 ? `/?${qs}#multiview` : `/?${qs}#live`;
 }
 
 export function LivePlayer({
