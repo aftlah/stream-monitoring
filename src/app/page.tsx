@@ -1,65 +1,143 @@
-import Image from "next/image";
+import { AppHeader } from "@/components/app-header";
+import { AppFooter } from "@/components/app-footer";
+import { EmptyState } from "@/components/empty-state";
+import { LayoutSwitcher } from "@/components/layout-switcher";
+import { LiveGrid } from "@/components/live-grid";
+import { LiveMultiview } from "@/components/live-multiview";
+import { LiveSidebar } from "@/components/live-sidebar";
+import { StatsBar } from "@/components/stats-bar";
+import { getMonitoredStreamers } from "@/lib/streamers";
+import { getLiveStreamsForStreamers } from "@/lib/youtube";
+import { parseLayoutOption } from "@/types/layout";
+import type { LiveStream } from "@/types/live-stream";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+export const revalidate = 60;
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const layout = parseLayoutOption(
+    typeof resolvedSearchParams?.layout === "string"
+      ? resolvedSearchParams.layout
+      : undefined,
+  );
+
+  const watchParam = resolvedSearchParams?.watch;
+  const requestedWatchIds = Array.isArray(watchParam)
+    ? watchParam
+    : typeof watchParam === "string" && watchParam.length > 0
+      ? [watchParam]
+      : [];
+  const selectedVideoIds = Array.from(new Set(requestedWatchIds));
+
+  const monitored = await getMonitoredStreamers();
+
+  if (monitored.length === 0) {
+    return (
+      <div id="top" className="min-h-screen bg-background text-foreground">
+        <AppHeader />
+        <main
+          id="content"
+          className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6"
+        >
+          <div className="space-y-4">
+            <EmptyState
+              title="No monitored channels configured"
+              description="Add channel entries to /data/streamers.json (name + channelId) to start monitoring."
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+        </main>
+        <AppFooter />
+      </div>
+    );
+  }
+
+  let liveStreams: LiveStream[] = [];
+  let apiError: string | null = null;
+
+  try {
+    liveStreams = await getLiveStreamsForStreamers(monitored);
+  } catch (err) {
+    apiError = err instanceof Error ? err.message : "Unknown YouTube API error.";
+  }
+
+  const totalMonitored = monitored.length;
+  const totalLive = liveStreams.length;
+  const liveByVideoId = new Map(liveStreams.map((s) => [s.videoId, s] as const));
+  const selectedStreams = selectedVideoIds
+    .map((id) => liveByVideoId.get(id))
+    .filter((s): s is LiveStream => s !== undefined);
+  const remainingLiveStreams =
+    selectedVideoIds.length > 0
+      ? liveStreams.filter((s) => !selectedVideoIds.includes(s.videoId))
+      : liveStreams;
+
+  return (
+    <div id="top" className="min-h-screen bg-background text-foreground">
+      <AppHeader />
+      <main
+        id="content"
+        className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6"
+      >
+        <div className="space-y-4">
+          <header className="space-y-1">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+              Dashboard
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Multi-stream monitoring for channels that are live right now.
+            </p>
+          </header>
+
+          <div id="stats" className="space-y-4">
+            <StatsBar totalMonitored={totalMonitored} totalLive={totalLive} />
+            <LayoutSwitcher value={layout} />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
+            <div id="live" className="space-y-4">
+              {apiError ? (
+                <EmptyState
+                  title="Unable to fetch live status"
+                  description={apiError}
+                />
+              ) : totalLive === 0 ? (
+                <EmptyState
+                  title="No channels are live right now"
+                  description="RAGE LIVE MONITOR will automatically refresh on the next scan. Keep the dashboard open."
+                />
+              ) : (
+                <>
+                  <LiveMultiview
+                    selectedStreams={selectedStreams}
+                    layout={layout}
+                    selectedVideoIds={selectedVideoIds}
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-sm font-semibold text-foreground">
+                      Live Channels
+                    </h2>
+                    <div className="text-xs text-muted-foreground">
+                      {remainingLiveStreams.length} shown
+                    </div>
+                  </div>
+                  <LiveGrid
+                    streams={remainingLiveStreams}
+                    layout={layout}
+                    selectedVideoIds={selectedVideoIds}
+                  />
+                </>
+              )}
+            </div>
+
+            <LiveSidebar streams={liveStreams} />
+          </div>
         </div>
       </main>
+      <AppFooter />
     </div>
   );
 }
