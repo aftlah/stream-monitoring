@@ -6,7 +6,9 @@ import { LiveGrid } from "@/components/live-grid";
 import { LiveMultiview } from "@/components/live-multiview";
 import { LiveSidebar } from "@/components/live-sidebar";
 import { StatsBar } from "@/components/stats-bar";
+import { TiktokLiveCard } from "@/components/tiktok-live-card";
 import { getMonitoredStreamers } from "@/lib/streamers";
+import { getTiktokLiveStatuses } from "@/lib/tiktok";
 import { getLiveStreamsForStreamers } from "@/lib/youtube";
 import { parseLayoutOption } from "@/types/layout";
 import type { LiveStream } from "@/types/live-stream";
@@ -57,6 +59,7 @@ export default async function Home({
 
   let liveStreams: LiveStream[] = [];
   let apiError: string | null = null;
+  let tiktokLive: { name: string; tiktokUrl: string }[] = [];
 
   try {
     liveStreams = await getLiveStreamsForStreamers(monitored);
@@ -65,7 +68,23 @@ export default async function Home({
   }
 
   const totalMonitored = monitored.length;
-  const totalLive = liveStreams.length;
+  try {
+    const tiktokCandidates = monitored
+      .filter((s) => typeof s.tiktokUrl === "string" && s.tiktokUrl.length > 0)
+      .map((s) => ({ name: s.name, tiktokUrl: s.tiktokUrl! }));
+
+    const statuses = await getTiktokLiveStatuses(
+      tiktokCandidates.map((x) => x.tiktokUrl),
+    );
+    const liveSet = new Set(
+      statuses.filter((s) => s.isLive).map((s) => s.tiktokUrl),
+    );
+    tiktokLive = tiktokCandidates.filter((c) => liveSet.has(c.tiktokUrl));
+  } catch {
+    tiktokLive = [];
+  }
+
+  const totalLive = liveStreams.length + tiktokLive.length;
   const liveByVideoId = new Map(liveStreams.map((s) => [s.videoId, s] as const));
   const selectedStreams = selectedVideoIds
     .map((id) => liveByVideoId.get(id))
@@ -129,11 +148,36 @@ export default async function Home({
                     layout={layout}
                     selectedVideoIds={selectedVideoIds}
                   />
+                  {tiktokLive.length > 0 ? (
+                    <section aria-label="TikTok live" className="space-y-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <h2 className="text-sm font-semibold text-foreground">
+                          TikTok Live
+                        </h2>
+                        <div className="text-xs text-muted-foreground">
+                          {tiktokLive.length} live
+                        </div>
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {tiktokLive.map((t) => (
+                          <TiktokLiveCard
+                            key={t.tiktokUrl}
+                            name={t.name}
+                            tiktokUrl={t.tiktokUrl}
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  ) : null}
                 </>
               )}
             </div>
 
-            <LiveSidebar streams={liveStreams} monitored={monitored} />
+            <LiveSidebar
+              streams={liveStreams}
+              monitored={monitored}
+              tiktokLive={tiktokLive}
+            />
           </div>
         </div>
       </main>

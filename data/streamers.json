@@ -1,13 +1,5 @@
 [
   {
-    "name": "Ojan",
-    "channelId": "UCj1jXMG3tXmVBFLvoCZNOLw"
-  },
-  {
-    "name": "Doni",
-    "channelId": "UCcwE-tBXPxS_oNn25qRkisQ"
-  },
-  {
     "name": "Nero",
     "channelId": "UCL7cD4QBsvJmCx7wfO2tSVw"
   },
@@ -45,10 +37,7 @@
   },
   {
     "name": "Sofie",
-    "tiktokUrl": "https://www.tiktok.com/@sunnnxp0"
-  },
-  {
-    "name": "Babon",
-    "tiktokUrl": "https://www.tiktok.com/@babonkingrp"
+    "tiktokUrl": "https://www.tiktok.com/@sunnnxp0",
+    "tiktokForceLive": true
   }
 ]

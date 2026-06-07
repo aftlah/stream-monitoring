@@ -17,9 +17,11 @@ function normalize(s: string) {
 export function LiveSidebar({
   streams,
   monitored,
+  tiktokLive,
 }: {
   streams: LiveStream[];
   monitored: Streamer[];
+  tiktokLive: { name: string; tiktokUrl: string }[];
 }) {
   const [query, setQuery] = useState("");
 
@@ -41,6 +43,12 @@ export function LiveSidebar({
     if (q.length === 0) return withNoYouTube;
     return withNoYouTube.filter((s) => s.name.toLowerCase().includes(q));
   }, [monitored, query]);
+
+  const filteredTiktokLive = useMemo(() => {
+    const q = normalize(query);
+    if (q.length === 0) return tiktokLive;
+    return tiktokLive.filter((s) => s.name.toLowerCase().includes(q));
+  }, [query, tiktokLive]);
 
   return (
     <aside
@@ -93,6 +101,47 @@ export function LiveSidebar({
         </CardContent>
       </Card>
 
+      {filteredTiktokLive.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2">TikTok Live</span>
+              <Badge variant="default">{filteredTiktokLive.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {filteredTiktokLive.map((s) => (
+              <div
+                key={s.tiktokUrl}
+                className="flex items-center justify-between gap-2 rounded-md px-2 py-2 text-sm text-foreground"
+              >
+                <div className="min-w-0">
+                  <div className="truncate">{s.name}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="live">LIVE</Badge>
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="secondary"
+                    aria-label={`Open ${s.name} on TikTok`}
+                  >
+                    <a
+                      href={s.tiktokUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open
+                      <ExternalLink className="h-4 w-4" aria-hidden />
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
+
       {tiktokOnly.length > 0 ? (
         <Card>
           <CardHeader>
@@ -107,7 +156,14 @@ export function LiveSidebar({
                 key={s.tiktokUrl}
                 className="flex items-center justify-between gap-2 rounded-md px-2 py-2 text-sm text-foreground"
               >
-                <span className="min-w-0 truncate">{s.name}</span>
+                <div className="min-w-0">
+                  <div className="truncate">{s.name}</div>
+                  {s.tiktokForceLive ? (
+                    <div className="text-xs text-muted-foreground">
+                      Manual (not auto-detected)
+                    </div>
+                  ) : null}
+                </div>
                 <Button asChild size="sm" variant="secondary" aria-label={`Open ${s.name} on TikTok`}>
                   <a href={s.tiktokUrl} target="_blank" rel="noopener noreferrer">
                     Open

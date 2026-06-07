@@ -25,6 +25,7 @@ function parseStreamer(input: unknown): Streamer {
   const name = input.name;
   const channelId = input.channelId;
   const tiktokUrl = input.tiktokUrl;
+  const tiktokForceLive = input.tiktokForceLive;
   if (typeof name !== "string" || name.trim().length === 0) {
     throw new Error("Invalid streamer entry: missing name.");
   }
@@ -33,6 +34,9 @@ function parseStreamer(input: unknown): Streamer {
   }
   if (tiktokUrl !== undefined && typeof tiktokUrl !== "string") {
     throw new Error("Invalid streamer entry: tiktokUrl must be a string.");
+  }
+  if (tiktokForceLive !== undefined && typeof tiktokForceLive !== "boolean") {
+    throw new Error("Invalid streamer entry: tiktokForceLive must be a boolean.");
   }
 
   const normalizedChannelId =
@@ -54,6 +58,7 @@ function parseStreamer(input: unknown): Streamer {
     name: name.trim(),
     channelId: normalizedChannelId,
     tiktokUrl: normalizedTiktokUrl,
+    tiktokForceLive: tiktokForceLive === true ? true : undefined,
   };
 }
 
