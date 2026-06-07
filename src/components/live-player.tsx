@@ -2,7 +2,7 @@ import { ExternalLink, X } from "lucide-react";
 
 import type { LayoutOption } from "@/types/layout";
 import type { LiveStream } from "@/types/live-stream";
-import { Badge } from "@/components/ui/badge";
+import { Badge, LiveDot } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
@@ -49,17 +49,25 @@ export function LivePlayer({
   embedSrc.searchParams.set("controls", "1");
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden hover:border-primary/30 hover:shadow-[0_0_20px_rgba(234,179,8,0.08)]">
+      {/* Header bar with gold left accent */}
       <div className="flex items-center justify-between gap-3 border-b border-border bg-background px-3 py-2">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <div className="truncate text-sm font-semibold text-primary">
-              {stream.streamerName}
+        <div className="flex items-center gap-2">
+          {/* Gold accent bar */}
+          <div className="h-8 w-1 rounded-full bg-primary/70" aria-hidden />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <div className="truncate text-sm font-bold text-primary drop-shadow-[0_0_6px_rgba(234,179,8,0.2)]">
+                {stream.streamerName}
+              </div>
+              <Badge variant="live" className="flex items-center gap-1">
+                <LiveDot className="h-1.5 w-1.5" />
+                LIVE
+              </Badge>
             </div>
-            <Badge variant="live">LIVE</Badge>
-          </div>
-          <div className="truncate text-xs text-muted-foreground" title={stream.title}>
-            {stream.title}
+            <div className="truncate text-xs text-muted-foreground" title={stream.title}>
+              {stream.title}
+            </div>
           </div>
         </div>
         <Button

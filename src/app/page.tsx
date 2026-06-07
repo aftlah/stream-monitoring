@@ -28,6 +28,7 @@ export default async function Home({
   );
 
   const multiviewEnabled = resolvedSearchParams?.mv !== "0";
+  const sidebarHidden = resolvedSearchParams?.sb === "0";
 
   const watchParam = resolvedSearchParams?.watch;
   const requestedWatchIds = Array.isArray(watchParam)
@@ -44,9 +45,9 @@ export default async function Home({
         <AppHeader />
         <main
           id="content"
-          className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6"
+          className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6"
         >
-          <div className="space-y-4">
+          <div className="space-y-6">
             <EmptyState
               title="No monitored channels configured"
               description="Add channel entries to /data/streamers.json (name + channelId, optional tiktokUrl) to start monitoring."
@@ -112,25 +113,33 @@ export default async function Home({
       <AppHeader />
       <main
         id="content"
-        className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6"
+        className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6"
       >
-        <div className="space-y-4">
-          <header className="space-y-1">
-            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+        <div className="space-y-6">
+          {/* Dashboard title */}
+          <header className="space-y-1 animate-fade-in-up">
+            <h1 className="flex items-center gap-3 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              <span className="inline-block h-6 w-1 rounded-full bg-primary" aria-hidden />
               Dashboard
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="pl-4 text-sm text-muted-foreground">
               Multi-stream monitoring for channels that are live right now.
             </p>
           </header>
 
-          <div id="stats" className="space-y-4">
+          {/* Stats + Layout */}
+          <div id="stats" className="space-y-4 animate-fade-in-up delay-100">
             <StatsBar totalMonitored={totalMonitored} totalLive={totalLive} />
-            <LayoutSwitcher value={layout} />
+            <LayoutSwitcher value={layout} sidebarHidden={sidebarHidden} />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
-            <div id="live" className="space-y-4">
+          {/* Main content layout (Flex for smooth animation) */}
+          <div
+            className={`flex flex-col lg:flex-row transition-all duration-500 ease-in-out ${
+              sidebarHidden ? "gap-0" : "gap-6"
+            }`}
+          >
+            <div id="live" className="flex-1 space-y-5 min-w-0 transition-all duration-500">
               {apiError ? (
                 <EmptyState
                   title="Unable to fetch live status"
@@ -150,11 +159,14 @@ export default async function Home({
                       selectedVideoIds={selectedVideoIds}
                     />
                   ) : null}
+
+                  {/* Live Channels section header */}
                   <div className="flex items-center justify-between gap-3">
-                    <h2 className="text-sm font-semibold text-foreground">
+                    <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+                      <span className="inline-block h-4 w-1 rounded-full bg-primary" aria-hidden />
                       Live Channels
                     </h2>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs font-medium text-muted-foreground tabular-nums">
                       {remainingLiveStreams.length} shown
                     </div>
                   </div>
@@ -163,13 +175,16 @@ export default async function Home({
                     layout={layout}
                     selectedVideoIds={selectedVideoIds}
                   />
+
+                  {/* TikTok Live section */}
                   {tiktokLive.length > 0 ? (
                     <section aria-label="TikTok live" className="space-y-3">
                       <div className="flex items-center justify-between gap-3">
-                        <h2 className="text-sm font-semibold text-foreground">
+                        <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
+                          <span className="inline-block h-4 w-1 rounded-full bg-gradient-to-b from-[#25F4EE] to-[#FE2C55]" aria-hidden />
                           TikTok Live
                         </h2>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs font-medium text-muted-foreground tabular-nums">
                           {tiktokLive.length} live
                         </div>
                       </div>
@@ -188,11 +203,25 @@ export default async function Home({
               )}
             </div>
 
-            <LiveSidebar
-              streams={liveStreams}
-              monitored={monitored}
-              tiktokLive={tiktokLive}
-            />
+            <div
+              className={`overflow-hidden transition-all duration-500 ease-in-out shrink-0 ${
+                sidebarHidden
+                  ? "w-full lg:w-0 max-h-0 lg:max-h-none opacity-0 m-0"
+                  : "w-full lg:w-[360px] max-h-[2000px] lg:max-h-none opacity-100"
+              }`}
+            >
+              <div
+                className={`w-full lg:w-[360px] transition-transform duration-500 ease-in-out ${
+                  sidebarHidden ? "translate-x-8 lg:translate-x-[100%]" : "translate-x-0"
+                }`}
+              >
+                <LiveSidebar
+                  streams={liveStreams}
+                  monitored={monitored}
+                  tiktokLive={tiktokLive}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </main>

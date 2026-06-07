@@ -1,6 +1,6 @@
 import { ExternalLink } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { Badge, LiveDot } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -42,17 +42,23 @@ export function TiktokLiveCard({
   const handle = getTiktokHandle(tiktokUrl);
   const openUrl = toTiktokLiveUrl(tiktokUrl);
   return (
-    <Card className="flex h-full flex-col overflow-hidden">
+    <Card className="group flex h-full flex-col overflow-hidden hover:border-primary/30 hover:shadow-[0_0_20px_rgba(234,179,8,0.08)] animate-fade-in-up">
+      {/* TikTok accent gradient bar */}
+      <div className="h-1 w-full bg-gradient-to-r from-[#25F4EE] via-[#FE2C55] to-[#25F4EE]" aria-hidden />
+
       <CardHeader className="space-y-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <CardTitle className="truncate text-sm">{name}</CardTitle>
+            <CardTitle className="truncate text-sm font-bold">{name}</CardTitle>
             <CardDescription className="text-xs">
               TikTok Live{handle ? ` · ${handle}` : ""}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="live">LIVE</Badge>
+            <Badge variant="live" className="flex items-center gap-1">
+              <LiveDot className="h-1.5 w-1.5" />
+              LIVE
+            </Badge>
           </div>
         </div>
       </CardHeader>

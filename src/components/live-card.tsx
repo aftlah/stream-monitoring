@@ -3,7 +3,7 @@ import { ExternalLink, MonitorUp } from "lucide-react";
 
 import type { LayoutOption } from "@/types/layout";
 import type { LiveStream } from "@/types/live-stream";
-import { Badge } from "@/components/ui/badge";
+import { Badge, LiveDot } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
@@ -24,10 +24,12 @@ export function LiveCard({
   stream,
   layout,
   selectedVideoIds,
+  index = 0,
 }: {
   stream: LiveStream;
   layout: LayoutOption;
   selectedVideoIds: string[];
+  index?: number;
 }) {
   const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(
     stream.videoId,
@@ -40,26 +42,53 @@ export function LiveCard({
     : Array.from(new Set([...selectedVideoIds, stream.videoId]));
   const multiviewHref = buildDashboardHref(layout, nextSelected);
 
+  // Stagger delay for entrance animation
+  const delayClass = index < 8 ? `delay-${(index + 1) * 100}` : "";
+
   return (
-    <Card id={`stream-${stream.channelId}`} className="overflow-hidden">
-      <div className="relative aspect-video w-full">
+    <Card
+      id={`stream-${stream.channelId}`}
+      className={`group overflow-hidden animate-fade-in-up ${delayClass} hover:border-primary/30 hover:shadow-[0_0_20px_rgba(234,179,8,0.08)]`}
+    >
+      {/* Thumbnail area */}
+      <div className="relative aspect-video w-full overflow-hidden">
         <Image
           src={stream.thumbnailUrl}
           alt={`Live stream thumbnail for ${stream.streamerName}`}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 60vw, 900px"
           priority={false}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/0" />
+        {/* Enhanced gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/5" />
+
+        {/* Scan line effect on hover */}
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          aria-hidden
+        >
+          <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-scan-line" />
+        </div>
+
+        {/* LIVE badge with pulsing dot */}
         <div className="absolute left-3 top-3 flex items-center gap-2">
-          <Badge variant="live">LIVE</Badge>
+          <Badge variant="live" className="flex items-center gap-1.5">
+            <LiveDot />
+            LIVE
+          </Badge>
+        </div>
+
+        {/* Streamer name overlay at bottom */}
+        <div className="absolute bottom-3 left-3 right-3">
+          <h3 className="text-sm font-bold text-primary drop-shadow-[0_0_8px_rgba(234,179,8,0.3)]">
+            {stream.streamerName}
+          </h3>
         </div>
       </div>
 
       <CardContent className="space-y-2">
-        <h3 className="text-sm font-semibold text-primary">{stream.streamerName}</h3>
-        <p className="text-sm text-foreground" title={stream.title}>
+        <p className="text-sm text-foreground/90" title={stream.title}>
           <span className="block truncate">{stream.title}</span>
         </p>
       </CardContent>
