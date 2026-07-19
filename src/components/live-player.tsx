@@ -96,24 +96,31 @@ export function LivePlayer({
         </div>
       </CardContent>
 
-      <CardFooter className="justify-end gap-2">
+      <CardFooter className="justify-end gap-2 border-t border-border bg-background px-3 py-2">
         {tiktokUrl ? (
           <Button
             asChild
             size="sm"
-            variant="secondary"
+            variant="ghost"
+            className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
             aria-label={`Open ${stream.streamerName} on TikTok`}
           >
             <a href={tiktokUrl} target="_blank" rel="noopener noreferrer">
               TikTok
-              <ExternalLink className="h-4 w-4" aria-hidden />
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden />
             </a>
           </Button>
         ) : null}
-        <Button asChild size="sm" aria-label={`Open ${stream.streamerName} on YouTube`}>
+        <Button
+          asChild
+          size="sm"
+          variant="outline"
+          className="h-8 gap-1.5 border-border px-2.5 text-xs font-medium text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+          aria-label={`Open ${stream.streamerName} on YouTube`}
+        >
           <a href={watchUrl} target="_blank" rel="noopener noreferrer">
-            Open on YouTube
-            <ExternalLink className="h-4 w-4" aria-hidden />
+            YouTube
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
           </a>
         </Button>
       </CardFooter>
