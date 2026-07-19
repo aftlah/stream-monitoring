@@ -113,22 +113,35 @@ export default async function Home({
       <AppHeader />
       <main
         id="content"
-        className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6"
+        className="mx-auto w-full max-w-[1400px] px-3 py-4 sm:px-6 sm:py-8"
       >
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-7">
           {/* Dashboard title */}
-          <header className="space-y-1 animate-fade-in-up">
-            <h1 className="flex items-center gap-3 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              <span className="inline-block h-6 w-1 rounded-full bg-primary" aria-hidden />
-              Dashboard
-            </h1>
-            <p className="pl-4 text-sm text-muted-foreground">
-              Multi-stream monitoring for channels that are live right now.
-            </p>
+          <header className="animate-fade-in-up">
+            <div className="flex flex-wrap items-end justify-between gap-2 border-b border-border/60 pb-2.5 sm:gap-3 sm:pb-4">
+              <div className="space-y-0.5 sm:space-y-1.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary/80">
+                  Operations
+                </p>
+                <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-3xl">
+                  Dashboard
+                </h1>
+                <p className="hidden max-w-xl text-sm text-muted-foreground sm:block">
+                  Multi-stream monitoring for channels that are live right now.
+                </p>
+              </div>
+              <div className="hidden items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 py-1.5 text-[11px] font-medium text-primary sm:flex">
+                <span className="relative flex h-1.5 w-1.5" aria-hidden>
+                  <span className="absolute inset-0 rounded-full bg-primary animate-dot-pulse" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                </span>
+                System online
+              </div>
+            </div>
           </header>
 
           {/* Stats + Layout */}
-          <div id="stats" className="space-y-4 animate-fade-in-up delay-100">
+          <div id="stats" className="space-y-2.5 animate-fade-in-up delay-100 sm:space-y-4">
             <StatsBar totalMonitored={totalMonitored} totalLive={totalLive} />
             <LayoutSwitcher value={layout} sidebarHidden={sidebarHidden} />
           </div>
@@ -139,7 +152,7 @@ export default async function Home({
               sidebarHidden ? "gap-0" : "gap-6"
             }`}
           >
-            <div id="live" className="flex-1 space-y-5 min-w-0 transition-all duration-500">
+            <div id="live" className="flex-1 space-y-3 min-w-0 transition-all duration-500 sm:space-y-5">
               {apiError ? (
                 <EmptyState
                   title="Unable to fetch live status"
@@ -161,12 +174,15 @@ export default async function Home({
                   ) : null}
 
                   {/* Live Channels section header */}
-                  <div className="flex items-center justify-between gap-3">
-                    <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-                      <span className="inline-block h-4 w-1 rounded-full bg-primary" aria-hidden />
+                  <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-2">
+                    <h2 className="flex items-center gap-2.5 text-sm font-semibold tracking-wide text-foreground">
+                      <span
+                        className="inline-block h-4 w-1 rounded-full bg-primary shadow-[0_0_10px_rgba(234,179,8,0.45)]"
+                        aria-hidden
+                      />
                       Live Channels
                     </h2>
-                    <div className="text-xs font-medium text-muted-foreground tabular-nums">
+                    <div className="rounded-full border border-border/70 bg-card/50 px-2.5 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground">
                       {remainingLiveStreams.length} shown
                     </div>
                   </div>
@@ -179,12 +195,15 @@ export default async function Home({
                   {/* TikTok Live section */}
                   {tiktokLive.length > 0 ? (
                     <section aria-label="TikTok live" className="space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-                          <span className="inline-block h-4 w-1 rounded-full bg-gradient-to-b from-[#25F4EE] to-[#FE2C55]" aria-hidden />
+                      <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-2">
+                        <h2 className="flex items-center gap-2.5 text-sm font-semibold tracking-wide text-foreground">
+                          <span
+                            className="inline-block h-4 w-1 rounded-full bg-gradient-to-b from-[#25F4EE] to-[#FE2C55]"
+                            aria-hidden
+                          />
                           TikTok Live
                         </h2>
-                        <div className="text-xs font-medium text-muted-foreground tabular-nums">
+                        <div className="rounded-full border border-border/70 bg-card/50 px-2.5 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground">
                           {tiktokLive.length} live
                         </div>
                       </div>

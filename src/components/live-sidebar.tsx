@@ -86,10 +86,14 @@ export function LiveSidebar({
       </h2>
 
       {/* Search card */}
-      <Card className="shrink-0">
+      <Card className="relative shrink-0 overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent"
+          aria-hidden
+        />
         <CardHeader className="space-y-3">
-          <CardTitle className="flex items-center gap-2">
-            <Crosshair className="h-4 w-4 text-primary" aria-hidden />
+          <CardTitle className="flex items-center gap-2 text-primary">
+            <Crosshair className="h-4 w-4" aria-hidden />
             Target Search
           </CardTitle>
           <SearchStreamer value={query} onChange={setQuery} />

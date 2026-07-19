@@ -7,12 +7,14 @@ import { Card } from "@/components/ui/card";
 
 function StatCard({
   label,
+  shortLabel,
   value,
   icon,
   glowColor,
   iconGradient,
 }: {
   label: string;
+  shortLabel: string;
   value: ReactNode;
   icon: ReactNode;
   glowColor?: string;
@@ -20,27 +22,33 @@ function StatCard({
 }) {
   return (
     <Card className="group relative overflow-hidden">
-      {/* Subtle radial glow behind the card */}
       <div
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(ellipse at 70% 50%, ${glowColor ?? "rgba(234,179,8,0.06)"}, transparent 70%)`,
+          background: `radial-gradient(ellipse at 80% 40%, ${glowColor ?? "rgba(234,179,8,0.08)"}, transparent 65%)`,
         }}
         aria-hidden
       />
-      <div className="relative flex items-center justify-between gap-4 p-4">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-60"
+        aria-hidden
+      />
+      <div className="relative flex items-center justify-between gap-2 p-2.5 sm:gap-4 sm:p-5">
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            {label}
+          <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-[10px] sm:tracking-[0.2em]">
+            <span className="sm:hidden">{shortLabel}</span>
+            <span className="hidden sm:inline">{label}</span>
           </div>
-          <div className="mt-1.5 font-mono text-2xl font-bold tabular-nums text-foreground">
+          <div className="mt-1 font-mono text-lg font-bold tabular-nums tracking-tight text-foreground sm:mt-2 sm:text-[1.75rem]">
             {value}
           </div>
         </div>
         <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border transition-all duration-300 group-hover:scale-105 group-hover:border-primary/30"
+          className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/80 transition-all duration-300 group-hover:scale-105 group-hover:border-primary/35 sm:flex"
           style={{
-            background: iconGradient ?? "linear-gradient(135deg, var(--card) 0%, var(--muted) 100%)",
+            background:
+              iconGradient ??
+              "linear-gradient(145deg, rgba(234,179,8,0.08) 0%, var(--muted) 100%)",
           }}
         >
           {icon}
@@ -58,9 +66,10 @@ export function StatsBar({
   totalLive: number;
 }) {
   return (
-    <section aria-label="Statistics" className="grid gap-3 sm:grid-cols-3">
+    <section aria-label="Statistics" className="grid grid-cols-3 gap-2 sm:gap-3">
       <StatCard
         label="Total Monitored"
+        shortLabel="Monitored"
         value={totalMonitored}
         icon={<Users className="h-5 w-5 text-primary" aria-hidden />}
         iconGradient="linear-gradient(135deg, rgba(234,179,8,0.1) 0%, var(--card) 100%)"
@@ -68,13 +77,14 @@ export function StatsBar({
       />
       <StatCard
         label="Live Now"
+        shortLabel="Live"
         value={
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5 sm:gap-2">
             {totalLive}
             {totalLive > 0 ? (
-              <span className="relative flex h-2.5 w-2.5" aria-hidden>
+              <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5" aria-hidden>
                 <span className="absolute inset-0 rounded-full bg-danger animate-dot-pulse" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-danger" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-danger sm:h-2.5 sm:w-2.5" />
               </span>
             ) : null}
           </span>
@@ -85,6 +95,7 @@ export function StatsBar({
       />
       <StatCard
         label="Next Scan"
+        shortLabel="Scan"
         value={<NextScanCountdown seconds={SCAN_INTERVAL_SECONDS} />}
         icon={<Eye className="h-5 w-5 text-primary" aria-hidden />}
         iconGradient="linear-gradient(135deg, rgba(234,179,8,0.1) 0%, var(--card) 100%)"

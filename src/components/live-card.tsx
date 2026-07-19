@@ -48,7 +48,7 @@ export function LiveCard({
   return (
     <Card
       id={`stream-${stream.channelId}`}
-      className={`group overflow-hidden animate-fade-in-up ${delayClass} hover:border-primary/30 hover:shadow-[0_0_20px_rgba(234,179,8,0.08)]`}
+      className={`group overflow-hidden animate-fade-in-up ${delayClass} hover:border-primary/25 hover:shadow-[0_0_28px_rgba(234,179,8,0.08)]`}
     >
       {/* Thumbnail area */}
       <div className="relative aspect-video w-full overflow-hidden">
@@ -56,22 +56,19 @@ export function LiveCard({
           src={stream.thumbnailUrl}
           alt={`Live stream thumbnail for ${stream.streamerName}`}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 60vw, 900px"
           priority={false}
         />
-        {/* Enhanced gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/5" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/10" />
 
-        {/* Scan line effect on hover */}
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           aria-hidden
         >
-          <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-scan-line" />
+          <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/25 to-transparent animate-scan-line" />
         </div>
 
-        {/* LIVE badge with pulsing dot */}
         <div className="absolute left-3 top-3 flex items-center gap-2">
           <Badge variant="live" className="flex items-center gap-1.5">
             <LiveDot />
@@ -79,20 +76,19 @@ export function LiveCard({
           </Badge>
         </div>
 
-        {/* Streamer name overlay at bottom */}
         <div className="absolute bottom-3 left-3 right-3">
-          <h3 className="text-sm font-bold text-primary drop-shadow-[0_0_8px_rgba(234,179,8,0.3)]">
+          <h3 className="text-sm font-bold tracking-wide text-primary drop-shadow-[0_0_10px_rgba(234,179,8,0.35)]">
             {stream.streamerName}
           </h3>
         </div>
       </div>
 
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-2 pt-3">
         <p className="text-sm text-foreground/90" title={stream.title}>
           <span className="block truncate">{stream.title}</span>
         </p>
       </CardContent>
-      <CardFooter className="flex flex-wrap items-center justify-between gap-2">
+      <CardFooter className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3">
         <Button
           asChild
           variant={isSelected ? "default" : "secondary"}
@@ -126,7 +122,8 @@ export function LiveCard({
         <Button
           asChild
           size="sm"
-          className="w-full sm:w-auto"
+          variant="outline"
+          className="w-full border-primary/35 text-primary hover:border-primary hover:bg-primary hover:text-black sm:w-auto"
           aria-label={`Watch ${stream.streamerName}`}
         >
           <a href={watchUrl} target="_blank" rel="noopener noreferrer">

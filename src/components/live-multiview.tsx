@@ -34,23 +34,24 @@ export function LiveMultiview({
   return (
     <section id="multiview" aria-label="Multi-stream viewing" className="space-y-3 animate-fade-in-up">
       {/* Multiview header bar */}
-      <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
-        <div className="flex min-w-0 items-center gap-2">
-          {/* Gold accent bar */}
-          <div className="h-6 w-1 rounded-full bg-primary/70" aria-hidden />
-          <MonitorPlay className="h-4 w-4 text-primary" aria-hidden />
-          <h2 className="text-sm font-bold tracking-wider text-foreground">MULTI-VIEW</h2>
+      <Card className="flex flex-wrap items-center justify-between gap-2 border-border/80 bg-card/70 p-2.5 sm:gap-3 sm:p-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+          <div className="h-5 w-1 rounded-full bg-primary/80 shadow-[0_0_8px_rgba(234,179,8,0.4)] sm:h-6" aria-hidden />
+          <MonitorPlay className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" aria-hidden />
+          <h2 className="text-xs font-bold tracking-[0.14em] text-foreground sm:text-sm">
+            MULTI-VIEW
+          </h2>
           <Badge variant="default">{selectedStreams.length}</Badge>
           {overflow > 0 ? (
-            <span className="text-xs text-muted-foreground">
+            <span className="hidden text-xs text-muted-foreground sm:inline">
               Showing {visible.length} (layout capacity). Switch layout to view more.
             </span>
           ) : null}
         </div>
-        <Button asChild variant="secondary" size="sm" aria-label="Clear multi-view selection">
+        <Button asChild variant="secondary" size="sm" className="h-7 px-2.5 text-xs sm:h-9" aria-label="Clear multi-view selection">
           <a href={clearHref} target="_self">
             Clear
-            <Trash2 className="h-4 w-4" aria-hidden />
+            <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
           </a>
         </Button>
       </Card>
