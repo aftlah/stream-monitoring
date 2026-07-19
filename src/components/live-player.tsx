@@ -5,6 +5,7 @@ import type { LiveStream } from "@/types/live-stream";
 import { Badge, LiveDot } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { YoutubeLiveEmbed } from "@/components/youtube-live-embed";
 
 function buildDashboardHref(layout: LayoutOption, watchIds: string[]) {
   const params = new URLSearchParams();
@@ -23,10 +24,12 @@ export function LivePlayer({
   stream,
   layout,
   selectedVideoIds,
+  loadIndex = 0,
 }: {
   stream: LiveStream;
   layout: LayoutOption;
   selectedVideoIds: string[];
+  loadIndex?: number;
 }) {
   const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(
     stream.videoId,
@@ -37,16 +40,6 @@ export function LivePlayer({
     layout,
     selectedVideoIds.filter((id) => id !== stream.videoId),
   );
-
-  const embedSrc = new URL(
-    `https://www.youtube-nocookie.com/embed/${encodeURIComponent(stream.videoId)}`,
-  );
-  embedSrc.searchParams.set("autoplay", "1");
-  embedSrc.searchParams.set("mute", "1");
-  embedSrc.searchParams.set("playsinline", "1");
-  embedSrc.searchParams.set("rel", "0");
-  embedSrc.searchParams.set("modestbranding", "1");
-  embedSrc.searchParams.set("controls", "1");
 
   return (
     <Card className="overflow-hidden hover:border-primary/25 hover:shadow-[0_0_28px_rgba(234,179,8,0.07)]">
@@ -86,14 +79,10 @@ export function LivePlayer({
 
       <CardContent className="p-0">
         <div className="relative aspect-video w-full bg-black">
-          <iframe
-            className="absolute inset-0 h-full w-full"
-            src={embedSrc.toString()}
+          <YoutubeLiveEmbed
+            videoId={stream.videoId}
             title={`YouTube player for ${stream.streamerName}`}
-            loading="lazy"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
+            startDelayMs={loadIndex * 450}
           />
         </div>
       </CardContent>

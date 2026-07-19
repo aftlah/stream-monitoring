@@ -76,12 +76,13 @@ export function LiveMultiview({
         </Card>
       ) : (
         <div className={`grid gap-3 ${getLayoutGridClasses(layout)}`}>
-          {visible.map((stream) => (
+          {visible.map((stream, index) => (
             <LivePlayer
               key={stream.videoId}
               stream={stream}
               layout={layout}
               selectedVideoIds={selectedVideoIds}
+              loadIndex={index}
             />
           ))}
           {placeholders > 0
