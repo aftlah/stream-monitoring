@@ -58,13 +58,90 @@ async function getRecentVideoIdsForChannel(
 ): Promise<string[]> {
   const url = new URL("https://www.youtube.com/feeds/videos.xml");
   url.searchParams.set("channel_id", channelId);
-  const res = await fetch(
-    url.toString(),
-    fresh ? { cache: "no-store" } : { next: { revalidate: SCAN_INTERVAL_SECONDS } },
-  );
+  const res = await fetch(url.toString(), {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (compatible; RageLiveMonitor/1.0; +https://rage-live.vercel.app)",
+      Accept: "application/atom+xml,application/xml,text/xml,*/*",
+    },
+    ...(fresh
+      ? { cache: "no-store" as const }
+      : { next: { revalidate: SCAN_INTERVAL_SECONDS } }),
+  });
   if (!res.ok) return [];
   const xml = await res.text();
-  return parseVideoIdsFromRss(xml).slice(0, 5);
+  if (xml.includes("<!DOCTYPE html>") || xml.includes("<html")) return [];
+  return parseVideoIdsFromRss(xml).slice(0, 8);
+}
+
+/**
+ * New live streams often appear on /channel/{id}/live before the Atom RSS feed.
+ * This avoids missing "just went live" broadcasts (no YouTube API quota).
+ */
+async function getLiveVideoIdFromChannelPage(
+  channelId: string,
+  fresh = false,
+): Promise<string | null> {
+  const url = `https://www.youtube.com/channel/${encodeURIComponent(channelId)}/live`;
+  try {
+    const res = await fetch(url, {
+      redirect: "follow",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      ...(fresh
+        ? { cache: "no-store" as const }
+        : { next: { revalidate: SCAN_INTERVAL_SECONDS } }),
+    });
+    if (!res.ok) return null;
+
+    const finalUrl = res.url;
+    const fromRedirect = finalUrl.match(/[?&]v=([\w-]{11})/);
+    if (fromRedirect) return fromRedirect[1];
+
+    const html = await res.text();
+    if (
+      /LIVE_STREAM_OFFLINE/i.test(html) ||
+      /"isLiveNow"\s*:\s*false/i.test(html) ||
+      /this channel has gone offline/i.test(html)
+    ) {
+      return null;
+    }
+
+    const canonical = html.match(
+      /<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})"/i,
+    );
+    if (canonical) return canonical[1];
+
+    const liveNow = html.match(
+      /"isLiveNow"\s*:\s*true[\s\S]{0,400}?"videoId"\s*:\s*"([\w-]{11})"/i,
+    );
+    if (liveNow) return liveNow[1];
+
+    const videoThenLive = html.match(
+      /"videoId"\s*:\s*"([\w-]{11})"[\s\S]{0,400}?"isLiveNow"\s*:\s*true/i,
+    );
+    if (videoThenLive) return videoThenLive[1];
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function getCandidateVideoIdsForChannel(
+  channelId: string,
+  fresh = false,
+): Promise<string[]> {
+  const [rssIds, liveId] = await Promise.all([
+    getRecentVideoIdsForChannel(channelId, fresh),
+    getLiveVideoIdFromChannelPage(channelId, fresh),
+  ]);
+  const ids = [...rssIds];
+  if (liveId) ids.unshift(liveId);
+  return Array.from(new Set(ids));
 }
 
 function chunk<T>(items: readonly T[], size: number): T[][] {
@@ -123,7 +200,7 @@ async function queryLiveStreamsForStreamers(
     5,
     async (streamer) => {
       try {
-        const ids = await getRecentVideoIdsForChannel(streamer.channelId, fresh);
+        const ids = await getCandidateVideoIdsForChannel(streamer.channelId, fresh);
         return { channelId: streamer.channelId, ids };
       } catch {
         return { channelId: streamer.channelId, ids: [] };

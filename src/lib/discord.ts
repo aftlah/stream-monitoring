@@ -12,9 +12,10 @@ export async function sendLiveNotification(stream: LiveStream): Promise<void> {
   const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(
     stream.videoId,
   )}`;
+  const monitorUrl = "https://rage-live.vercel.app/";
 
   const payload = {
-    content: `@everyone\n**${stream.streamerName}** is live on YouTube!\n${watchUrl}`,
+    content: `@everyone\n**${stream.streamerName}** is live on YouTube!\n${watchUrl}\n\nLihat semua streamer RAGE yang sedang live di sini: ${monitorUrl}`,
     allowed_mentions: {
       parse: ["everyone"],
     },
@@ -28,7 +29,11 @@ export async function sendLiveNotification(stream: LiveStream): Promise<void> {
         },
         title: stream.title,
         url: watchUrl,
-        description: `[Watch Stream](${watchUrl})`,
+        description: [
+          `[Watch Stream](${watchUrl})`,
+          "",
+          `Monitor semua streamer RAGE yang live: [RAGE LIVE MONITOR](${monitorUrl})`,
+        ].join("\n"),
         color: 0xff0000,
         image: {
           url: stream.thumbnailUrl,
