@@ -112,8 +112,7 @@ async function queryLiveStreamsForStreamers(
   fresh: boolean,
 ): Promise<LiveStream[]> {
   const youtubeStreamers = streamers.filter(
-    (s): s is Streamer & { channelId: string } =>
-      typeof s.channelId === "string" && s.channelId.trim().length > 0,
+    (s) => s.channelId.trim().length > 0,
   );
   if (youtubeStreamers.length === 0) return [];
 
@@ -184,7 +183,6 @@ async function queryLiveStreamsForStreamers(
     liveStreams.push({
       channelId: streamer.channelId,
       streamerName: streamer.name,
-      tiktokUrl: streamer.tiktokUrl,
       videoId: item.id,
       title: item.snippet.title,
       thumbnailUrl,

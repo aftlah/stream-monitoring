@@ -34,7 +34,6 @@ export function LiveCard({
   const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(
     stream.videoId,
   )}`;
-  const tiktokUrl = stream.tiktokUrl;
 
   const isSelected = selectedVideoIds.includes(stream.videoId);
   const nextSelected = isSelected
@@ -105,20 +104,6 @@ export function LiveCard({
             <MonitorUp className="h-4 w-4" aria-hidden />
           </a>
         </Button>
-        {tiktokUrl ? (
-          <Button
-            asChild
-            variant="secondary"
-            size="sm"
-            className="w-full sm:w-auto"
-            aria-label={`Open ${stream.streamerName} on TikTok`}
-          >
-            <a href={tiktokUrl} target="_blank" rel="noopener noreferrer">
-              TikTok
-              <ExternalLink className="h-4 w-4" aria-hidden />
-            </a>
-          </Button>
-        ) : null}
         <Button
           asChild
           size="sm"

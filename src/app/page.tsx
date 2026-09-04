@@ -6,9 +6,7 @@ import { LiveGrid } from "@/components/live-grid";
 import { LiveMultiview } from "@/components/live-multiview";
 import { LiveSidebar } from "@/components/live-sidebar";
 import { StatsBar } from "@/components/stats-bar";
-import { TiktokLiveCard } from "@/components/tiktok-live-card";
 import { getMonitoredStreamers } from "@/lib/streamers";
-import { getTiktokLiveStatuses } from "@/lib/tiktok";
 import { getLiveStreamsForStreamers } from "@/lib/youtube";
 import { getLayoutCapacity, parseLayoutOption } from "@/types/layout";
 import type { LiveStream } from "@/types/live-stream";
@@ -50,7 +48,7 @@ export default async function Home({
           <div className="space-y-6">
             <EmptyState
               title="No monitored channels configured"
-              description="Add channel entries to /data/streamers.json (name + channelId, optional tiktokUrl) to start monitoring."
+              description="Add channel entries to /data/streamers.json (name + channelId) to start monitoring."
             />
           </div>
         </main>
@@ -61,7 +59,6 @@ export default async function Home({
 
   let liveStreams: LiveStream[] = [];
   let apiError: string | null = null;
-  let tiktokLive: { name: string; tiktokUrl: string }[] = [];
 
   try {
     liveStreams = await getLiveStreamsForStreamers(monitored);
@@ -70,23 +67,7 @@ export default async function Home({
   }
 
   const totalMonitored = monitored.length;
-  try {
-    const tiktokCandidates = monitored
-      .filter((s) => typeof s.tiktokUrl === "string" && s.tiktokUrl.length > 0)
-      .map((s) => ({ name: s.name, tiktokUrl: s.tiktokUrl! }));
-
-    const statuses = await getTiktokLiveStatuses(
-      tiktokCandidates.map((x) => x.tiktokUrl),
-    );
-    const liveSet = new Set(
-      statuses.filter((s) => s.isLive).map((s) => s.tiktokUrl),
-    );
-    tiktokLive = tiktokCandidates.filter((c) => liveSet.has(c.tiktokUrl));
-  } catch {
-    tiktokLive = [];
-  }
-
-  const totalLive = liveStreams.length + tiktokLive.length;
+  const totalLive = liveStreams.length;
   const capacity = getLayoutCapacity(layout);
 
   const selectedVideoIds = multiviewEnabled
@@ -191,33 +172,6 @@ export default async function Home({
                     layout={layout}
                     selectedVideoIds={selectedVideoIds}
                   />
-
-                  {/* TikTok Live section */}
-                  {tiktokLive.length > 0 ? (
-                    <section aria-label="TikTok live" className="space-y-3">
-                      <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-2">
-                        <h2 className="flex items-center gap-2.5 text-sm font-semibold tracking-wide text-foreground">
-                          <span
-                            className="inline-block h-4 w-1 rounded-full bg-gradient-to-b from-[#25F4EE] to-[#FE2C55]"
-                            aria-hidden
-                          />
-                          TikTok Live
-                        </h2>
-                        <div className="rounded-full border border-border/70 bg-card/50 px-2.5 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground">
-                          {tiktokLive.length} live
-                        </div>
-                      </div>
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {tiktokLive.map((t) => (
-                          <TiktokLiveCard
-                            key={t.tiktokUrl}
-                            name={t.name}
-                            tiktokUrl={t.tiktokUrl}
-                          />
-                        ))}
-                      </div>
-                    </section>
-                  ) : null}
                 </>
               )}
             </div>
@@ -234,11 +188,7 @@ export default async function Home({
                   sidebarHidden ? "translate-x-8 lg:translate-x-[100%]" : "translate-x-0"
                 }`}
               >
-                <LiveSidebar
-                  streams={liveStreams}
-                  monitored={monitored}
-                  tiktokLive={tiktokLive}
-                />
+                <LiveSidebar streams={liveStreams} monitored={monitored} />
               </div>
             </div>
           </div>

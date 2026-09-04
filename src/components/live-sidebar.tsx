@@ -1,41 +1,24 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import { Crosshair, ExternalLink, ListVideo } from "lucide-react";
+import { Crosshair, ListVideo } from "lucide-react";
 
 import type { LiveStream } from "@/types/live-stream";
 import type { Streamer } from "@/types/streamer";
 import { SearchStreamer } from "@/components/search-streamer";
 import { Badge, LiveDot } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function normalize(s: string) {
   return s.toLowerCase().trim();
 }
 
-function toTiktokLiveUrl(tiktokUrl: string): string {
-  try {
-    const url = new URL(tiktokUrl);
-    const parts = url.pathname.split("/").filter(Boolean);
-    const at = parts.find((p) => p.startsWith("@"));
-    if (!at) return tiktokUrl;
-    const handle = at.slice(1).trim();
-    if (handle.length === 0) return tiktokUrl;
-    return `https://m.tiktok.com/@${encodeURIComponent(handle)}/live`;
-  } catch {
-    return tiktokUrl;
-  }
-}
-
 export function LiveSidebar({
   streams,
   monitored,
-  tiktokLive,
 }: {
   streams: LiveStream[];
   monitored: Streamer[];
-  tiktokLive: { name: string; tiktokUrl: string }[];
 }) {
   const [query, setQuery] = useState("");
 
@@ -43,34 +26,21 @@ export function LiveSidebar({
     return new Set(streams.map((s) => s.channelId));
   }, [streams]);
 
-  const tiktokLiveByUrl = useMemo(() => {
-    return new Set(tiktokLive.map((t) => t.tiktokUrl));
-  }, [tiktokLive]);
-
   const filteredMonitored = useMemo(() => {
     const q = normalize(query);
-    const candidates = monitored
-      .filter((s) => Boolean(s.channelId) || Boolean(s.tiktokUrl))
-      .map((s) => {
-        const channelId = s.channelId;
-        const tiktokUrl = s.tiktokUrl;
-        const isYoutubeLive = channelId ? liveByChannelId.has(channelId) : false;
-        const isTiktokLive = tiktokUrl ? tiktokLiveByUrl.has(tiktokUrl) : false;
-        const isLive = isYoutubeLive || isTiktokLive;
-
-        return {
-          key: channelId ? `yt:${channelId}` : tiktokUrl ? `tt:${tiktokUrl}` : s.name,
-          name: s.name,
-          channelId,
-          tiktokUrl,
-          isLive,
-          isTiktokOnly: !channelId && Boolean(tiktokUrl),
-        };
-      });
+    const candidates = monitored.map((s) => {
+      const isLive = liveByChannelId.has(s.channelId);
+      return {
+        key: `yt:${s.channelId}`,
+        name: s.name,
+        channelId: s.channelId,
+        isLive,
+      };
+    });
 
     if (q.length === 0) return candidates;
     return candidates.filter((s) => s.name.toLowerCase().includes(q));
-  }, [liveByChannelId, monitored, query, tiktokLiveByUrl]);
+  }, [liveByChannelId, monitored, query]);
 
   const totalLiveInSidebar = useMemo(() => {
     return filteredMonitored.reduce((acc, s) => acc + (s.isLive ? 1 : 0), 0);
@@ -85,7 +55,6 @@ export function LiveSidebar({
         Sidebar
       </h2>
 
-      {/* Search card */}
       <Card className="relative shrink-0 overflow-hidden">
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent"
@@ -100,7 +69,6 @@ export function LiveSidebar({
         </CardHeader>
       </Card>
 
-      {/* Streamer list */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-2">
@@ -136,15 +104,9 @@ export function LiveSidebar({
                     <div className={`truncate font-medium ${s.isLive ? "text-foreground" : ""}`}>
                       {s.name}
                     </div>
-                    {s.isTiktokOnly ? (
-                      <div className="text-[11px] text-muted-foreground">
-                        TikTok account
-                      </div>
-                    ) : null}
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    {s.isTiktokOnly ? <Badge variant="secondary">TIKTOK</Badge> : null}
+                  <div className="flex shrink-0 items-center gap-2">
                     {s.isLive ? (
                       <Badge variant="live" className="flex items-center gap-1">
                         <LiveDot className="h-1.5 w-1.5" />
@@ -154,7 +116,7 @@ export function LiveSidebar({
                       <Badge variant="secondary">OFFLINE</Badge>
                     )}
 
-                    {s.channelId && s.isLive ? (
+                    {s.isLive ? (
                       <a
                         href={`#stream-${s.channelId}`}
                         target="_self"
@@ -163,24 +125,6 @@ export function LiveSidebar({
                       >
                         View
                       </a>
-                    ) : null}
-
-                    {s.tiktokUrl ? (
-                      <Button
-                        asChild
-                        size="sm"
-                        variant="secondary"
-                        aria-label={`Open ${s.name} on TikTok`}
-                      >
-                        <a
-                          href={toTiktokLiveUrl(s.tiktokUrl)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Open
-                          <ExternalLink className="h-4 w-4" aria-hidden />
-                        </a>
-                      </Button>
                     ) : null}
                   </div>
                 </div>
