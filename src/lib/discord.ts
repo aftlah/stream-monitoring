@@ -6,7 +6,7 @@ function getDiscordWebhookUrl(): string {
     throw new Error("Missing DISCORD_WEBHOOK_URL environment variable.");
   }
 
-  // Discord requires this flag for webhooks that send link buttons / components
+  
   const webhook = new URL(url.trim());
   webhook.searchParams.set("with_components", "true");
   return webhook.toString();
@@ -73,14 +73,13 @@ export async function sendLiveNotification(stream: LiveStream): Promise<void> {
         },
       },
     ],
-    // Link buttons (style 5) — same grey Discord buttons with external-link icon
     components: [
       {
-        type: 1, // Action Row
+        type: 1, 
         components: [
           {
-            type: 2, // Button
-            style: 5, // Link
+            type: 2, 
+            style: 5, 
             label: "Watch Stream",
             url: watchUrl,
           },

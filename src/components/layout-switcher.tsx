@@ -1,7 +1,6 @@
 "use client";
 
 import { LayoutGrid, Eye, EyeOff } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { layoutOptions, type LayoutOption } from "@/types/layout";
@@ -13,30 +12,14 @@ function labelForLayout(layout: LayoutOption) {
 export function LayoutSwitcher({
   value,
   sidebarHidden,
+  onLayoutChange,
+  onToggleSidebar,
 }: {
   value: LayoutOption;
   sidebarHidden?: boolean;
+  onLayoutChange: (layout: LayoutOption) => void;
+  onToggleSidebar: () => void;
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  function setLayout(nextLayout: LayoutOption) {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("layout", nextLayout);
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }
-
-  function toggleSidebar() {
-    const params = new URLSearchParams(searchParams.toString());
-    if (sidebarHidden) {
-      params.delete("sb");
-    } else {
-      params.set("sb", "0");
-    }
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }
-
   return (
     <section
       aria-label="Layout switcher"
@@ -50,7 +33,7 @@ export function LayoutSwitcher({
         <Button
           variant="ghost"
           size="sm"
-          onClick={toggleSidebar}
+          onClick={onToggleSidebar}
           className="h-7 gap-1.5 px-2 text-[11px] font-medium text-muted-foreground hover:text-foreground sm:hidden"
           aria-label={sidebarHidden ? "Show streamer list" : "Hide streamer list"}
         >
@@ -76,7 +59,7 @@ export function LayoutSwitcher({
         <Button
           variant="ghost"
           size="sm"
-          onClick={toggleSidebar}
+          onClick={onToggleSidebar}
           className="hidden h-8 gap-2 text-xs font-medium text-muted-foreground hover:text-foreground sm:inline-flex"
           aria-label={sidebarHidden ? "Show streamer list" : "Hide streamer list"}
         >
@@ -99,12 +82,11 @@ export function LayoutSwitcher({
             type="button"
             variant={opt === value ? "default" : "ghost"}
             size="sm"
-            onClick={() => setLayout(opt)}
+            onClick={() => onLayoutChange(opt)}
             aria-label={`Switch layout to ${labelForLayout(opt)}`}
+            aria-pressed={opt === value}
             className={`h-7 min-w-0 px-2 text-[11px] sm:h-9 sm:px-3 sm:text-xs ${
-              opt === value
-                ? ""
-                : "text-muted-foreground hover:text-foreground"
+              opt === value ? "" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {labelForLayout(opt)}
