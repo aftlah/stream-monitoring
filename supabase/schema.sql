@@ -13,10 +13,6 @@ create table if not exists live_state (
 
 create index if not exists live_state_updated_at_idx on live_state (updated_at desc);
 
--- Server cron uses the anon key; disable RLS for this internal state table.
-alter table live_state disable row level security;
-
--- Optional: notification history
 create table if not exists notification_log (
   id bigint generated always as identity primary key,
   channel_id text not null,
@@ -26,4 +22,22 @@ create table if not exists notification_log (
   sent_at timestamptz not null default now()
 );
 
+-- Cron uses SUPABASE_ANON_KEY — must allow inserts
+alter table live_state disable row level security;
 alter table notification_log disable row level security;
+
+drop policy if exists "cron_all_live_state" on live_state;
+create policy "cron_all_live_state"
+  on live_state
+  for all
+  to anon, authenticated, service_role
+  using (true)
+  with check (true);
+
+drop policy if exists "cron_all_notification_log" on notification_log;
+create policy "cron_all_notification_log"
+  on notification_log
+  for all
+  to anon, authenticated, service_role
+  using (true)
+  with check (true);

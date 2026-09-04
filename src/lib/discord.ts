@@ -14,30 +14,27 @@ export async function sendLiveNotification(stream: LiveStream): Promise<void> {
   )}`;
 
   const payload = {
-    username: "RAGE LIVE MONITOR",
+    content: `@everyone\n**${stream.streamerName}** is live on YouTube!\n${watchUrl}`,
+    allowed_mentions: {
+      parse: ["everyone"],
+    },
+    username: "Rage Share Stream",
+    avatar_url: "https://www.youtube.com/s/desktop/1a1db9c0/img/favicon_144x144.png",
     embeds: [
       {
-        title: `${stream.streamerName} is LIVE`,
-        description: stream.title,
+        author: {
+          name: stream.streamerName,
+          url: watchUrl,
+        },
+        title: stream.title,
         url: watchUrl,
-        color: 0xeab308,
-        thumbnail: {
+        description: `[Watch Stream](${watchUrl})`,
+        color: 0xff0000,
+        image: {
           url: stream.thumbnailUrl,
         },
-        fields: [
-          {
-            name: "Streamer",
-            value: stream.streamerName,
-            inline: true,
-          },
-          {
-            name: "Platform",
-            value: "YouTube",
-            inline: true,
-          },
-        ],
         footer: {
-          text: "RAGE LIVE MONITOR",
+          text: "YouTube • RAGE LIVE MONITOR",
         },
         timestamp: stream.startedAt ?? new Date().toISOString(),
       },
