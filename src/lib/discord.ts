@@ -5,7 +5,37 @@ function getDiscordWebhookUrl(): string {
   if (!url || url.trim().length === 0) {
     throw new Error("Missing DISCORD_WEBHOOK_URL environment variable.");
   }
-  return url.trim();
+
+  // Discord requires this flag for webhooks that send link buttons / components
+  const webhook = new URL(url.trim());
+  webhook.searchParams.set("with_components", "true");
+  return webhook.toString();
+}
+
+function formatFooterTime(iso?: string): string {
+  const date = iso ? new Date(iso) : new Date();
+  const time = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+
+  const dayKey = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+  const todayKey = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
+  const dayLabel = dayKey === todayKey ? "Today" : dayKey;
+  return `${dayLabel} at ${time}`;
 }
 
 export async function sendLiveNotification(stream: LiveStream): Promise<void> {
@@ -13,14 +43,16 @@ export async function sendLiveNotification(stream: LiveStream): Promise<void> {
     stream.videoId,
   )}`;
   const monitorUrl = "https://rage-live.vercel.app/";
+  const footerTime = formatFooterTime(stream.startedAt);
 
   const payload = {
-    content: `@everyone\n**${stream.streamerName}** is live on YouTube!\n${watchUrl}\n\nLihat semua streamer RAGE yang sedang live di sini: ${monitorUrl}`,
+    content: `@everyone\n**${stream.streamerName}** is live on YouTube!`,
     allowed_mentions: {
       parse: ["everyone"],
     },
     username: "Rage Share Stream",
-    avatar_url: "https://www.youtube.com/s/desktop/1a1db9c0/img/favicon_144x144.png",
+    avatar_url:
+      "https://www.youtube.com/s/desktop/1a1db9c0/img/favicon_144x144.png",
     embeds: [
       {
         author: {
@@ -29,19 +61,36 @@ export async function sendLiveNotification(stream: LiveStream): Promise<void> {
         },
         title: stream.title,
         url: watchUrl,
-        description: [
-          `[Watch Stream](${watchUrl})`,
-          "",
-          `Monitor semua streamer RAGE yang live: [RAGE LIVE MONITOR](${monitorUrl})`,
-        ].join("\n"),
         color: 0xff0000,
         image: {
           url: stream.thumbnailUrl,
         },
         footer: {
-          text: "YouTube • RAGE LIVE MONITOR",
+          text: [
+            footerTime,
+            "\nKlik tombol di bawah untuk nonton stream, atau buka dashboard untuk lihat semua streamer RAGE yang sedang live.",
+          ].join("\n"),
         },
-        timestamp: stream.startedAt ?? new Date().toISOString(),
+      },
+    ],
+    // Link buttons (style 5) — same grey Discord buttons with external-link icon
+    components: [
+      {
+        type: 1, // Action Row
+        components: [
+          {
+            type: 2, // Button
+            style: 5, // Link
+            label: "Watch Stream",
+            url: watchUrl,
+          },
+          {
+            type: 2,
+            style: 5,
+            label: "Open Dashboard",
+            url: monitorUrl,
+          },
+        ],
       },
     ],
   };
